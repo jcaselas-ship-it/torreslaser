@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Torres Láser</title>
+<meta name="theme-color" content="#070b14">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Torres Láser">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
@@ -94,12 +100,12 @@
   }
   .settings-icons{
     display:flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items:flex-start;
-    gap: 16px;
+    gap: 12px 16px;
     flex: 1 1 auto;
     min-width: 0;
-    overflow-x: auto;
     padding-bottom: 2px;
     scrollbar-width: none;
   }
@@ -126,7 +132,7 @@
     color: var(--ink);
     touch-action: manipulation;
   }
-  .field.hidden{ display:none; }
+  .field.hidden, .icon-field.hidden{ display:none; }
 
   .icon-field{ display:flex; flex-direction:column; gap:6px; flex-shrink:0; }
   .icon-field-label{
@@ -250,12 +256,16 @@
   }
   .board-frame.thinking{ opacity: 0.92; }
 
-  .board-inner{ display:flex; gap: 6px; }
+  .board-inner{ display:grid; grid-template-columns: 18px minmax(0,1fr) 18px; grid-template-rows: auto auto auto; gap: 4px; }
 
-  .ranks{ display:grid; grid-template-rows: repeat(8, 1fr); align-items:center; padding-bottom: 22px; }
-  .ranks span{ font-size: 0.7rem; color: var(--ink-dim); width: 16px; text-align:center; font-weight:600; }
+  .ranks{ grid-row: 2; display:grid; grid-template-rows: repeat(8, 1fr); align-items:center; }
+  .ranks.r{ grid-column: 3; }
+  .ranks span{ font-size: 0.82rem; color: var(--piece-white); opacity: 0.8; text-align:center; font-weight:700; }
 
-  .board-col{ flex:1; display:flex; flex-direction:column; gap:6px; }
+  .board-col{ display: contents; }
+  .board-col .board{ grid-column: 2; grid-row: 2; }
+  .files.t{ grid-column: 2; grid-row: 1; }
+  .files.b{ grid-column: 2; grid-row: 3; }
 
   .board{
     display:grid;
@@ -270,8 +280,10 @@
   .board:focus{ outline: none; }
   .board:focus-visible{ box-shadow: 0 0 0 2px var(--piece-white); }
 
-  .files{ display:grid; grid-template-columns: repeat(8, 1fr); padding-top: 2px; }
-  .files span{ text-align:center; font-size:0.7rem; color: var(--ink-dim); font-weight:600; }
+  .files{ display:grid; grid-template-columns: repeat(8, 1fr); }
+  .files span{ text-align:center; font-size:0.82rem; color: var(--piece-white); opacity: 0.8; font-weight:700; }
+  .board.flip{ transform: rotate(180deg); }
+  .board.flip .square{ transform: rotate(180deg); }
 
   .square{
     position:relative;
@@ -454,6 +466,51 @@
     details.rules summary:hover{ color: #eef4ff; }
   }
 
+  /* ---------- online ---------- */
+  .icon-btn.net-on{ box-shadow: 0 0 0 2px #4fd68a, 0 0 12px rgba(79,214,138,0.5); }
+  #netOverlay{ position:fixed; inset:0; z-index:60; display:none; align-items:center; justify-content:center; padding:16px; background: rgba(2,5,12,0.78); backdrop-filter: blur(4px); }
+  #netOverlay.show{ display:flex; }
+  .net-card{ width: min(380px, 100%); background: var(--bg-panel); border:1px solid var(--grid-line); border-radius:14px; padding:20px; color: var(--ink); box-shadow: 0 0 40px -10px var(--piece-white); }
+  .net-card h2{ margin:0 0 12px; font-size:1.15rem; letter-spacing:0.08em; text-align:center; }
+  .net-lbl{ font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color: var(--ink-dim); font-weight:700; margin:4px 0 8px; }
+  .net-sides{ display:flex; gap:8px; }
+  .net-sides button, .net-card .net-btn{ flex:1; min-height:44px; border-radius:10px; border:1px solid var(--grid-line); background: rgba(255,255,255,0.04); color: var(--ink); font: 700 0.9rem/1 inherit; letter-spacing:0.04em; cursor:pointer; }
+  .net-sides button[aria-pressed="true"]{ border-color: currentColor; box-shadow: 0 0 10px -2px currentColor; }
+  .net-sides .c{ color: var(--piece-white); } .net-sides .m{ color: var(--piece-black); }
+  .net-card .net-btn{ width:100%; margin-top:10px; }
+  .net-card .net-btn.main{ background: color-mix(in srgb, var(--piece-white) 20%, transparent); border-color: var(--piece-white); }
+  .net-card .net-btn:disabled{ opacity:0.45; cursor:default; }
+  .net-or{ text-align:center; color: var(--ink-dim); font-size:0.88rem; margin:14px 0 6px; }
+  .net-row{ display:flex; gap:8px; }
+  .net-row input{ flex:1; min-width:0; min-height:44px; border-radius:10px; border:1px solid var(--grid-line); background: rgba(0,0,0,0.3); color: var(--ink); font: 700 1.15rem/1 inherit; text-align:center; letter-spacing:0.16em; text-transform:uppercase; }
+  .net-row .net-btn{ flex:0 0 auto; width:auto; margin:0; padding:0 16px; }
+  #netBig{ text-align:center; font-size:2.6rem; font-weight:800; letter-spacing:0.14em; color: var(--piece-white); text-shadow: var(--white-shadow); margin:12px 0 0; }
+  #netBig:empty{ display:none; }
+  #netStatus{ text-align:center; color: var(--ink-dim); font-size:0.88rem; min-height:1.3em; margin-top:10px; overflow-wrap:anywhere; }
+
+  .opts-bar{ justify-content:center; padding: 8px 12px; }
+  .rules-ov{ position:fixed; inset:0; z-index:60; display:none; align-items:center; justify-content:center; padding:16px; background: rgba(2,5,12,0.78); backdrop-filter: blur(4px); }
+  .rules-ov.show{ display:flex; }
+  .rules-card{ width: min(460px, 100%); max-height: 86vh; overflow-y:auto; }
+  .rules-card .rules-body{ padding:0; font-size:0.92rem; line-height:1.55; color: var(--ink-dim); }
+  .rules-card .rules-body strong{ color: var(--ink); }
+  .opts-bar .icon-group{ justify-content:center; }
+
+  /* ---------- phones ---------- */
+  @media (max-width: 480px){
+    .settings{ padding: 10px 12px; }
+    .settings-icons{ gap: 10px 14px; }
+    .icon-group{ gap: 6px; }
+    .icon-btn, .theme-swatch, .side-swatch{ width: 38px; height: 38px; }
+    .icon-btn svg{ width: 18px; height: 18px; }
+  }
+
+  @media (max-height: 700px) and (orientation: portrait){
+    header{ margin-bottom: 8px; }
+    h1{ font-size: 1.5rem; margin: 0; }
+    .layout{ gap: 10px; }
+  }
+
   /* ---------- small phones ---------- */
   @media (max-width: 360px){
     body{ padding-left: 10px; padding-right: 10px; }
@@ -464,26 +521,26 @@
     .icon-btn svg{ width: 18px; height: 18px; }
     .field-compact{ flex-basis: 92px; }
     .field-compact select{ padding: 8px 2px; }
-    .ranks span, .files span{ font-size: 0.6rem; }
-    .ranks{ padding-bottom: 18px; }
+    .ranks span, .files span{ font-size: 0.72rem; }
   }
 
   /* ---------- short / landscape viewports ---------- */
   @media (max-height: 560px) and (orientation: landscape){
-    body{ padding-top: 10px; padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
-    header{ margin-bottom: 8px; }
-    h1{ font-size: 1.3rem; }
-    header p{ display:none; }
-    .layout{ gap: 8px; }
-    .settings{ padding: 8px 12px; gap: 6px 12px; }
+    body{ padding-top: 6px; padding-bottom: calc(8px + env(safe-area-inset-bottom)); }
+    header{ display:none; }
+    .layout{ max-width: none; display:grid; grid-template-columns: auto minmax(0, 380px); grid-auto-rows: min-content; gap: 8px 16px; justify-content:center; align-items:start; }
+    .layout > *{ grid-column: 2; }
+    .layout > .board-frame{ grid-column: 1; grid-row: 1 / span 4; width: calc(100svh - 14px); max-width: none; padding: 6px; }
+    .settings{ padding: 8px 10px; gap: 6px 10px; }
+    .settings-icons{ gap: 8px 12px; }
+    .icon-btn, .theme-swatch, .side-swatch{ width: 36px; height: 36px; }
     details.rules{ display:none; }
-    .board-frame{ max-width: 46vh; }
   }
 
   /* ---------- tablet and up ---------- */
   @media (min-width: 700px){
     .layout{ max-width: 760px; }
-    .board-frame{ max-width: 620px; }
+    .board-frame{ max-width: min(620px, max(360px, calc(100svh - 300px))); }
   }
 </style>
 </head>
@@ -506,6 +563,9 @@
           <button type="button" class="icon-btn" data-mode="vsAI" title="Contra el ordenador" aria-label="Contra el ordenador">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
           </button>
+          <button type="button" class="icon-btn" data-mode="online" title="Online (cada uno en su dispositivo)" aria-label="Online">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 010 18"/><path d="M12 3a14 14 0 000 18"/></svg>
+          </button>
         </div>
       </div>
       <div class="icon-field" id="sideField">
@@ -527,20 +587,6 @@
         <span class="icon-field-label">Piezas / tablero</span>
         <div class="icon-group" id="themeGroup"></div>
       </div>
-      <div class="icon-field">
-        <span class="icon-field-label">Opciones</span>
-        <div class="icon-group">
-          <button type="button" class="icon-btn" id="helpToggleBtn" title="Modo ayuda" aria-label="Modo ayuda (marca casillas amenazadas)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7c.5.4.8 1 .8 1.6V17h6.4v-.7c0-.6.3-1.2.8-1.6A7 7 0 0012 2z"/></svg>
-          </button>
-          <button type="button" class="icon-btn active" id="soundToggleBtn" title="Sonido" aria-label="Sonido">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
-          </button>
-          <button type="button" class="icon-btn" id="resetBtn" title="Reiniciar partida" aria-label="Reiniciar partida">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.13-3.36L23 10M1 14l5.36 4.36A9 9 0 0020.49 15"/></svg>
-          </button>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -553,16 +599,36 @@
     <div class="board-inner">
       <div class="ranks" id="ranks"></div>
       <div class="board-col">
+        <div class="files t" id="filesT"></div>
         <div class="board" id="board"></div>
-        <div class="files" id="files"></div>
+        <div class="files b" id="files"></div>
       </div>
+      <div class="ranks r" id="ranksR"></div>
     </div>
   </div>
 
-  <details class="rules">
-    <summary title="Cómo se juega" aria-label="Cómo se juega">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="7.3" r="0.6" fill="currentColor" stroke="none"/></svg>
-    </summary>
+  <div class="settings opts-bar" aria-label="Opciones">
+    <div class="icon-group" id="optsGroup">
+      <button type="button" class="icon-btn" id="helpToggleBtn" title="Modo ayuda" aria-label="Modo ayuda (marca casillas amenazadas)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7c.5.4.8 1 .8 1.6V17h6.4v-.7c0-.6.3-1.2.8-1.6A7 7 0 0012 2z"/></svg>
+      </button>
+      <button type="button" class="icon-btn active" id="soundToggleBtn" title="Sonido" aria-label="Sonido">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+      </button>
+      <button type="button" class="icon-btn" id="resetBtn" title="Reiniciar partida" aria-label="Reiniciar partida">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.13-3.36L23 10M1 14l5.36 4.36A9 9 0 0020.49 15"/></svg>
+      </button>
+      <button type="button" class="icon-btn" id="rulesBtn" title="Cómo se juega" aria-label="Cómo se juega">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="7.3" r="0.6" fill="currentColor" stroke="none"/></svg>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<div id="rulesOverlay" class="rules-ov">
+  <div class="net-card rules-card" role="dialog" aria-modal="true" aria-label="Cómo se juega">
+    <h2>CÓMO SE JUEGA</h2>
     <div class="rules-body">
       <p><strong>Objetivo:</strong> deja al rival sin ningún movimiento legal.</p>
       <p><strong>Posición inicial:</strong> el láser cian empieza en h1, el láser magenta en a8.</p>
@@ -572,12 +638,31 @@
       <p><strong>Modo ayuda:</strong> resalta en rojo las casillas bloqueadas por la línea de la torre rival.</p>
       <p><strong>Sonido:</strong> efectos tipo láser al mover, al rechazar un movimiento y al terminar la partida. Se puede silenciar en cualquier momento.</p>
       <p><strong>Contra el ordenador:</strong> elige tu bando y la dificultad. En difícil, el ordenador juega de forma matemáticamente óptima.</p>
+      <p><strong>Online:</strong> pulsa el globo 🌐, elige tu láser y crea la partida; tu rival se une con el código. Cada uno juega en su dispositivo.</p>
       <p>Toca tu torre para seleccionarla y luego toca la casilla destino.</p>
     </div>
-  </details>
-
+    <button type="button" class="net-btn" id="rulesClose">Entendido</button>
+  </div>
 </div>
-
+<div id="netOverlay">
+  <div class="net-card" role="dialog" aria-modal="true" aria-label="Partida online">
+    <h2>🌐 PARTIDA ONLINE</h2>
+    <div id="netSetup">
+      <div class="net-lbl">Tu láser</div>
+      <div class="net-sides">
+        <button type="button" class="c" data-side="white" aria-pressed="true">♜ Cian · empieza</button>
+        <button type="button" class="m" data-side="black" aria-pressed="false">♜ Magenta</button>
+      </div>
+      <button type="button" class="net-btn main" id="netCreate">Crear partida</button>
+      <div class="net-or">o únete con el código de tu rival</div>
+      <div class="net-row"><input id="netCode" maxlength="4" placeholder="K7P2" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Código de la partida"><button type="button" class="net-btn" id="netJoin">Unirse</button></div>
+    </div>
+    <div id="netBig"></div>
+    <div id="netStatus" aria-live="polite"></div>
+    <button type="button" class="net-btn" id="netLeave" hidden>Salir de la partida online</button>
+    <button type="button" class="net-btn" id="netClose">Cerrar</button>
+  </div>
+</div>
 <div class="victory-overlay" id="victoryOverlay">
   <div class="victory-card" id="victoryCard">
     <div class="victory-beam"></div>
@@ -917,7 +1002,12 @@
 
       victoryTitle.textContent = `LÁSER ${winnerLabel} GANA`;
       victorySubtitle.textContent = `LÁSER ${loserLabel} se ha quedado sin movimientos legales`;
+      if (state.mode === 'online' && NET && NET.on) victoryTitle.textContent = winnerSide === NET.me ? '¡HAS GANADO!' : 'GANA TU RIVAL';
       victoryCard.style.setProperty('--victory-color', winnerColorVar);
+    } else if (state.mode === 'online'){
+      const lbl = state.turn === 'white' ? 'CIAN' : 'MAGENTA';
+      statusBar.classList.add(state.turn === 'white' ? 'turn-white' : 'turn-black');
+      statusText.textContent = !NET || !NET.on ? 'Online: crea o únete a una partida' : (state.turn === NET.me ? `Tu turno · LÁSER ${lbl}` : 'Turno del rival…');
     } else if (state.mode === 'vsAI' && state.turn === state.aiSide){
       statusBar.classList.add(state.turn === 'white' ? 'turn-white' : 'turn-black', 'thinking');
       statusText.textContent = `LÁSER ${state.turn === 'white' ? 'CIAN' : 'MAGENTA'} pensando...`;
@@ -975,6 +1065,7 @@
   function onSquareClick(fileIdx, rank){
     if (state.over) return;
     if (state.mode === 'vsAI' && state.turn === state.aiSide) return;
+    if (state.mode === 'online' && (!NET || !NET.on || state.turn !== NET.me)) return;
 
     const me = state[state.turn];
     const opp = state[opponentOf(state.turn)];
@@ -990,6 +1081,7 @@
     if (!state.selected) return;
 
     if (isLegalMove(me, fileIdx, rank, opp)){
+      if (state.mode === 'online') netSend({ t: 'mv', file: fileIdx, rank });
       me.file = fileIdx;
       me.rank = rank;
       state.selected = false;
@@ -1004,11 +1096,20 @@
     }
   }
 
+  function buildLabels(flip){
+    const ranks = flip ? [1,2,3,4,5,6,7,8] : [8,7,6,5,4,3,2,1];
+    const files = flip ? [...FILES].reverse() : FILES;
+    for (const el of [ranksEl, document.getElementById('ranksR')]){ el.innerHTML = ''; ranks.forEach(r => { const s = document.createElement('span'); s.textContent = r; el.appendChild(s); }); }
+    for (const el of [filesEl, document.getElementById('filesT')]){ el.innerHTML = ''; files.forEach(f => { const s = document.createElement('span'); s.textContent = f; el.appendChild(s); }); }
+  }
+  function applyFlip(){
+    const flip = state.mode === 'online' && !!NET && NET.me === 'black';
+    boardEl.classList.toggle('flip', flip);
+    buildLabels(flip);
+  }
+
   function buildBoard(){
     for (let rank = 8; rank >= 1; rank--){
-      const label = document.createElement('span');
-      label.textContent = rank;
-      ranksEl.appendChild(label);
 
       for (let fileIdx = 0; fileIdx <= 7; fileIdx++){
         const sq = document.createElement('div');
@@ -1022,11 +1123,7 @@
         boardEl.appendChild(sq);
       }
     }
-    FILES.forEach(f => {
-      const label = document.createElement('span');
-      label.textContent = f;
-      filesEl.appendChild(label);
-    });
+    buildLabels(false);
   }
 
   const SOUND_ICONS = {
@@ -1084,6 +1181,8 @@
   }
 
   function syncSettingsVisibility(){
+    const onBtn = modeGroup.querySelector('[data-mode="online"]');
+    if (onBtn) onBtn.classList.toggle('net-on', !!(NET && NET.on));
     const vsAI = state.mode === 'vsAI';
     sideField.classList.toggle('hidden', !vsAI);
     difficultyField.classList.toggle('hidden', !vsAI);
@@ -1102,10 +1201,14 @@
 
   modeGroup.querySelectorAll('.icon-btn').forEach(btn => {
     btn.addEventListener('click', () => {
+      const was = state.mode;
       state.mode = btn.dataset.mode;
+      if (was === 'online' && state.mode !== 'online') netLeave();
       syncModeButtons();
       syncSettingsVisibility();
+      applyFlip();
       reset();
+      if (state.mode === 'online') openNet();
     });
   });
 
@@ -1134,8 +1237,9 @@
     syncSoundButton();
   });
 
-  resetBtn.addEventListener('click', reset);
-  victoryReplayBtn.addEventListener('click', reset);
+  function userReset(){ if (state.mode === 'online' && NET && NET.on) netSend({ t: 'reset' }); reset(); }
+  resetBtn.addEventListener('click', userReset);
+  victoryReplayBtn.addEventListener('click', userReset);
 
   function moveKbFocus(deltaFile, deltaRank){
     if (!state.kbFocus){
@@ -1167,6 +1271,95 @@
     }
   });
 
+  // ---------- Partida online (PeerJS): cada jugador en su dispositivo ----------
+  let NET = null, netSide = 'white';
+  const NAB = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', NPJ = 'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
+  const $ = id => document.getElementById(id);
+  const netOv = $('netOverlay');
+  const netLoad = () => window.Peer ? Promise.resolve() : new Promise((ok, ko) => { const e = document.createElement('script'); e.src = NPJ; e.onload = ok; e.onerror = ko; document.head.appendChild(e); });
+  const netSt = t => { $('netStatus').textContent = t; };
+  const netBusy = b => { $('netCreate').disabled = $('netJoin').disabled = b; };
+  function netSend(o){ try { if (NET && NET.c && NET.on) NET.c.send(o); } catch (e) {} }
+  function pickSide(sd){ netSide = sd; netOv.querySelectorAll('.net-sides button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.side === sd))); }
+  function netView(){
+    const on = !!(NET && NET.on);
+    $('netSetup').hidden = on; $('netLeave').hidden = !on;
+    if (on){ $('netBig').textContent = ''; netSt('Conectado · Partida ' + NET.code + ' · Eres LÁSER ' + (NET.me === 'white' ? 'CIAN' : 'MAGENTA') + '.'); }
+    syncSettingsVisibility();
+  }
+  function openNet(){ if (!NET){ netBusy(false); $('netBig').textContent = ''; netSt(''); } pickSide(netSide); netView(); netOv.classList.add('show'); }
+  function closeNet(){ if (NET && !NET.on) netLeave(); netOv.classList.remove('show'); }
+  function netLeave(){
+    if (NET){ netSend({ t: 'bye' }); const n = NET; NET = null; clearTimeout(n.to); try { n.c && n.c.close(); n.peer && n.peer.destroy(); } catch (e) {} }
+    netView(); applyFlip(); render();
+  }
+  function netStart(){ netView(); applyFlip(); reset(); netOv.classList.remove('show'); }
+  function netGone(){ NET = null; netView(); applyFlip(); render(); statusText.textContent = 'Tu rival se ha desconectado.'; }
+  function netWire(c){
+    NET.c = c;
+    c.on('data', d => {
+      if (!NET || !d) return;
+      if (d.t === 'cfg'){ NET.on = true; clearTimeout(NET.to); NET.me = d.host === 'white' ? 'black' : 'white'; netStart(); }
+      else if (d.t === 'mv'){
+        if (state.over || state.turn === NET.me) return;
+        const me = state[state.turn], opp = state[opponentOf(state.turn)];
+        if (!isLegalMove(me, d.file, d.rank, opp)) return;
+        me.file = d.file; me.rank = d.rank; state.selected = false;
+        state.turn = opponentOf(state.turn); soundMove(); checkGameOver(); render();
+      }
+      else if (d.t === 'reset') reset();
+      else if (d.t === 'bye'){ NET.on = false; netGone(); }
+    });
+    c.on('close', () => { if (NET && NET.c === c){ const was = NET.on; NET.on = false; if (was) netGone(); else netSt('Se perdió la conexión.'); } });
+  }
+  async function netCreate(){
+    netLeave(); netBusy(true);
+    const code = [0,0,0,0].map(() => NAB[Math.random() * 32 | 0]).join('');
+    NET = { code, me: netSide, on: false }; const me = NET;
+    $('netBig').textContent = code; netSt('Conectando…');
+    try {
+      await netLoad(); if (NET !== me) return;
+      NET.peer = new Peer('torreslaser-' + code);
+      NET.peer.on('open', () => { if (NET === me) netSt('Tu rival: pulsa 🌐 → escribe ' + code + ' → «Unirse». Esperando…' + (location.protocol.startsWith('http') ? ' Enlace: ' + location.href.split('#')[0] + '#' + code : '')); });
+      NET.peer.on('connection', c => {
+        if (NET !== me || NET.c){ c.on('open', () => c.close()); return; }
+        netWire(c);
+        c.on('open', () => { NET.on = true; c.send({ t: 'cfg', host: NET.me }); netStart(); });
+      });
+      NET.peer.on('error', e => { if (NET === me && !NET.on){ netSt(e.type === 'unavailable-id' ? 'Ese código está ocupado: pulsa otra vez «Crear partida».' : 'No hay conexión a internet. El juego online necesita internet.'); $('netBig').textContent = ''; netBusy(false); NET = null; } });
+    } catch (e) { netSt('No hay conexión a internet. El juego online necesita internet.'); netBusy(false); NET = null; }
+  }
+  async function netJoin(v){
+    const code = (v || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (code.length !== 4 || [...code].some(x => NAB.indexOf(x) < 0)){ netSt('El código son 4 letras o números, por ejemplo K7P2.'); return; }
+    netLeave(); netBusy(true); $('netBig').textContent = '';
+    netSt('Buscando la partida ' + code + '…');
+    NET = { code, me: null, on: false }; const me = NET;
+    const fail = t => { if (NET !== me || NET.on) return; netSt(t); netBusy(false); netLeave(); };
+    NET.to = setTimeout(() => fail('No encuentro esa partida: revisa el código y que tu rival la tenga abierta.'), 12000);
+    try {
+      await netLoad(); if (NET !== me) return;
+      NET.peer = new Peer();
+      NET.peer.on('open', () => { if (NET !== me) return; const c = NET.peer.connect('torreslaser-' + code, { reliable: true }); netWire(c); c.on('open', () => { if (NET === me) netSt('¡Conectado! Empezando…'); }); });
+      NET.peer.on('error', e => fail(e.type === 'peer-unavailable' ? 'No encuentro esa partida: revisa el código y que tu rival la tenga abierta.' : 'No hay conexión a internet. El juego online necesita internet.'));
+    } catch (e) { fail('No hay conexión a internet. El juego online necesita internet.'); }
+  }
+  netOv.querySelectorAll('.net-sides button').forEach(b => b.addEventListener('click', () => pickSide(b.dataset.side)));
+  $('netCreate').addEventListener('click', netCreate);
+  $('netJoin').addEventListener('click', () => netJoin($('netCode').value));
+  $('netCode').addEventListener('keydown', e => { if (e.key === 'Enter') $('netJoin').click(); });
+  $('netClose').addEventListener('click', closeNet);
+  $('netLeave').addEventListener('click', () => { netLeave(); netOv.classList.remove('show'); });
+  netOv.addEventListener('click', e => { if (e.target === netOv) closeNet(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && netOv.classList.contains('show')) closeNet(); });
+  const rulesOv = $('rulesOverlay');
+  $('rulesBtn').addEventListener('click', () => rulesOv.classList.add('show'));
+  $('rulesClose').addEventListener('click', () => rulesOv.classList.remove('show'));
+  rulesOv.addEventListener('click', e => { if (e.target === rulesOv) rulesOv.classList.remove('show'); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') rulesOv.classList.remove('show'); });
+  // Volver a pulsar el globo cuando ya estás en online abre la ventana
+  modeGroup.querySelector('[data-mode="online"]').addEventListener('click', () => { if (state.mode === 'online' && !netOv.classList.contains('show')) openNet(); });
+
   buildBoard();
   buildThemeOptions();
   applyTheme(state.theme);
@@ -1176,6 +1369,8 @@
   syncSoundButton();
   render();
   scheduleAIIfNeeded();
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+  { const h = location.hash.slice(1); if (/^[A-Za-z0-9]{4}$/.test(h)){ state.mode = 'online'; syncModeButtons(); syncSettingsVisibility(); reset(); openNet(); $('netCode').value = h.toUpperCase(); netJoin(h); } }
 })();
 </script>
 
